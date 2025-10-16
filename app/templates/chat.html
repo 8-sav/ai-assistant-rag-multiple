@@ -1,24 +1,15 @@
 <!-- app/templates/chat.html -->
 {% extends "base.html" %}
-
 {% block title %}Чат с AI Ассистентом{% endblock %}
-
 {% block content %}
 <div class="row g-3">
     <!-- Основной контент чата -->
     <div class="col-12 col-lg-8">
-        <div class="card h-100">
+        <div class="card">
             <div class="card-body d-flex flex-column">
-                <!-- Выбор модели -->
-                <div class="mb-3">
-                    <label for="modelSelect" class="form-label">Выберите модель:</label>
-                    <select id="modelSelect" class="form-select" data-session-id="{{ session_id }}">
-                        <!-- Заполняется через JS -->
-                    </select>
-                </div>
-
-                <!-- История чата -->
-                <div id="chatHistory" class="flex-grow-1 border rounded p-3 mb-3" style="min-height: 400px; max-height: 60vh; overflow-y: auto; background-color: #f8f9fa;">
+                <!-- ИСТОРИЯ ЧАТА -->
+                <!-- УБРАН class="flex-grow-1" -->
+                <div id="chatHistory" class="border rounded p-3 mb-3" style="background-color: #f8f9fa; min-height: 400px; max-height: 60vh; overflow-y: auto;">
                     <!-- Сообщения будут подгружаться сюда через JS -->
                     <div class="text-center text-muted h-100 d-flex align-items-center justify-content-center">
                         <div>
@@ -27,12 +18,11 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Форма ввода -->
-                <form id="chatForm" class="mt-auto">
+                <form id="chatForm" class="mt-auto chat-footer">
                     <div class="input-group">
                         <input type="text" id="userMessage" class="form-control" placeholder="Введите ваше сообщение..." required>
-                        <button type="submit" class="btn btn-primary d-flex align-items-center">
+                        <button type="submit" id="sendButton" class="btn btn-primary d-flex align-items-center">
                             <i class="bi bi-send me-2 d-none d-sm-inline"></i>
                             <span>Отправить</span>
                         </button>
@@ -41,10 +31,26 @@
             </div>
         </div>
     </div>
-
     <!-- Боковая панель с информацией -->
     <div class="col-12 col-lg-4">
-        <div class="card h-100">
+        <!-- Новая карточка для выбора модели (теперь первая) -->
+        <div class="card mb-3"> <!-- Добавлен mb-3 для отступа -->
+            <div class="card-header">
+                <h5 class="mb-0 d-flex align-items-center">
+                    <i class="bi bi-cpu me-2"></i>
+                    Выбор модели
+                </h5>
+            </div>
+            <div class="card-body">
+                <label for="modelSelect" class="form-label">Текущая модель:</label>
+                <select id="modelSelect" class="form-select" data-session-id="{{ session_id }}">
+                    <!-- Заполняется через JS -->
+                </select>
+            </div>
+        </div>
+
+        <!-- Карточка информации о сессии (теперь вторая) -->
+        <div class="card">
             <div class="card-header">
                 <h5 class="mb-0 d-flex align-items-center">
                     <i class="bi bi-info-circle me-2"></i>
@@ -63,7 +69,6 @@
         </div>
     </div>
 </div>
-
 <script>
     // Передаём session_id в глобальную переменную для chat.js
     window.chatConfig = {
@@ -71,3 +76,4 @@
     };
 </script>
 {% endblock %}
+```

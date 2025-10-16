@@ -5,9 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <meta name="HandheldFriendly" content="true">
+    <meta name="apple-mobile-web-app-capable" content="yes"> <!-- Для PWA-like на мобильных -->
     <title>{% block title %}AI Ассистент{% endblock %}</title>
     
-    <!-- Подключаем шрифт Inter и Bootstrap Icons -->
+    <!-- Подключаем шрифт Inter и SF Pro (fallback) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     
@@ -23,39 +24,39 @@
         <!-- Навигация -->
         <nav class="navbar navbar-expand-lg navbar-light">
             <div class="container">
-                <a class="navbar-brand d-flex align-items-center" href="{{ url_for('main.index') }}">
+                <div class="navbar-brand d-flex align-items-center">
                     <i class="bi bi-robot me-2"></i>
-                    <span class="d-none d-sm-inline">AI Ассистент</span>
-                </a>
+                    <span>AI Ассистент</span>
+                </div>
                 
                 <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
+                <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                    <ul class="navbar-nav">
                         <li class="nav-item">
                             <a class="nav-link d-flex align-items-center" href="{{ url_for('main.index') }}">
                                 <i class="bi bi-chat me-2 me-md-1"></i>
-                                <span class="d-none d-md-inline">Чат</span>
+                                <span>Чат</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link d-flex align-items-center" href="{{ url_for('rag.upload_page') }}">
                                 <i class="bi bi-file-earmark-text me-2 me-md-1"></i>
-                                <span class="d-none d-md-inline">Документы</span>
+                                <span>Документы</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link d-flex align-items-center" href="{{ url_for('model.models_page') }}">
                                 <i class="bi bi-cpu me-2 me-md-1"></i>
-                                <span class="d-none d-md-inline">Модели</span>
+                                <span>Модели</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link d-flex align-items-center" href="https://t.me/rtsav_bot" target="_blank">
                                 <i class="bi bi-telegram me-2 me-md-1"></i>
-                                <span class="d-none d-md-inline">Телеграм Бот</span>
+                                <span>Телеграм Бот</span>
                             </a>
                         </li>
                     </ul>
@@ -64,7 +65,7 @@
         </nav>
 
         <!-- Основной контент -->
-        <main class="container my-4 flex-grow-1">
+        <main class="container my-2 flex-grow-1">
             {% with messages = get_flashed_messages() %}
                 {% if messages %}
                     {% for message in messages %}
@@ -79,7 +80,6 @@
             {% block content %}{% endblock %}
         </main>
 
-        <!-- Футер УДАЛЕН -->
     </div>
 
     <!-- Подключаем Bootstrap JS -->
