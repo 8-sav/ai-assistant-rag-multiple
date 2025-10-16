@@ -1,0 +1,90 @@
+<!-- app/templates/base.html -->
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="HandheldFriendly" content="true">
+    <title>{% block title %}AI Ассистент{% endblock %}</title>
+    
+    <!-- Подключаем шрифт Inter и Bootstrap Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Подключаем Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Подключаем кастомные стили -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <!-- Обертка для ограничения ширины -->
+    <div class="main-wrapper">
+        <!-- Навигация -->
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center" href="{{ url_for('main.index') }}">
+                    <i class="bi bi-robot me-2"></i>
+                    <span class="d-none d-sm-inline">AI Ассистент</span>
+                </a>
+                
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center" href="{{ url_for('main.index') }}">
+                                <i class="bi bi-chat me-2 me-md-1"></i>
+                                <span class="d-none d-md-inline">Чат</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center" href="{{ url_for('rag.upload_page') }}">
+                                <i class="bi bi-file-earmark-text me-2 me-md-1"></i>
+                                <span class="d-none d-md-inline">Документы</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center" href="{{ url_for('model.models_page') }}">
+                                <i class="bi bi-cpu me-2 me-md-1"></i>
+                                <span class="d-none d-md-inline">Модели</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center" href="https://t.me/rtsav_bot" target="_blank">
+                                <i class="bi bi-telegram me-2 me-md-1"></i>
+                                <span class="d-none d-md-inline">Телеграм Бот</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Основной контент -->
+        <main class="container my-4 flex-grow-1">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-info alert-dismissible fade show mb-3" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Футер УДАЛЕН -->
+    </div>
+
+    <!-- Подключаем Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Подключаем кастомный JS -->
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+</body>
+</html>

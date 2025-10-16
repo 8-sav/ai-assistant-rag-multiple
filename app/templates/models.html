@@ -1,0 +1,259 @@
+<!-- app/templates/models.html -->
+{% extends "base.html" %}
+
+{% block title %}Управление моделями{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+    <div class="row g-3">
+        <!-- Левая колонка: Список моделей -->
+        <div class="col-12 col-lg-8">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0 d-flex align-items-center">
+                        <i class="bi bi-cpu me-2"></i>
+                        Доступные модели
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="modelsList">
+                        <div class="text-center text-muted py-4">
+                            <div class="spinner-border spinner-border-sm me-2" role="status">
+                                <span class="visually-hidden">Загрузка...</span>
+                            </div>
+                            Загрузка списка моделей...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Правая колонка: Информация о сессии -->
+        <div class="col-12 col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0 d-flex align-items-center">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Текущая сессия
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>ID сессии:</strong>
+                        <div class="mt-1">
+                            <span id="currentSessionId" class="badge bg-primary text-wrap">—</span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Активная модель:</strong>
+                        <div class="mt-1">
+                            <span id="activeModel" class="badge bg-primary text-wrap">загрузка...</span>
+                        </div>
+                    </div>
+                    <div class="alert alert-warning small mb-0" id="modelWarning" style="display: none;">
+                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        Выберите другую модель в списке выше.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ASCII-арт блок-схема -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                    <h5 class="mb-2 mb-md-0 d-flex align-items-center">
+                        <i class="bi bi-diagram-3 me-2"></i>
+                        Архитектура проекта
+                    </h5>
+                    <small class="text-muted">MVC + Service Layer</small>
+                </div>
+                <div class="card-body bg-dark p-0">
+                    <pre class="text-dark p-3 m-0" style="background-color: #ffffff; font-size: 0.85em; line-height: 1.2; white-space: pre-wrap; max-height: 500px; overflow-y: auto; font-family: 'Courier New', monospace;">
+<!-- существующий ASCII-арт -->
++---------------------------------------------------------------------------------------------+
+|                                ПОЛЬЗОВАТЕЛЬ (Browser)                                       |
+|  http://127.0.0.1:5000/                      (Главная страница чата, API чата)              |
+|  http://127.0.0.1:5000/api/                  (Загрузка документов в RAG)                    |
+|  http://127.0.0.1:5000/api/models-page       (Список моделей, переключение)                 |
++---------------------------------------------------------------------------------------------+
+                                           |
+                             HTTP-запрос (GET / POST)
+                                           |
+                                           v
++---------------------------------------------------------------------------------------------+
+|                              Flask Application (app/__init__.py)                            |
+|  - Инициализация приложения Flask                                                           |
+|  - Загрузка конфигурации из `app.config.Config`                                             |
+|    * Чтение из .env                                                                         |
+|    * Определение ключей API, путей, настроек LLM, RAG, файлов                               |
+|  - Настройка расширений: SQLAlchemy (db), Migrations                                        |
+|  - Регистрация Blueprints:                                                                  |
+|    * main_bp   -> '/'                  (Главная страница чата, API чата)                    |
+|    * model_bp  -> '/api/models*'       (Список моделей, переключение)                       |
+|    * rag_bp    -> '/api/'              (Загрузка документов, список, статус)                |
++---------------------------------------------------------------------------------------------+
+                                           |
+                            URL Routing by Blueprints
+       +----------------------------------+----------------------------------+
+       |                                  |                                  |
+       v                                  v                                  v
++-------------------------+  +----------------------------+  +-----------------------------+
+| main_bp.py              |  | model_bp.py                |  | rag_bp.py                   |
+| - @main.index (/)       |  | - @model.models_page       |  | - @rag.upload_page (/api/)  |
+|   * Рендерит chat.html  |  |   * Рендерит models.html   |  |   * Рендерит upload.html    |
+| - @main.api_chat        |  | - @model.get_models        |  | - @rag.upload_document      |
+|   * POST /api/chat      |  |   * GET /api/models        |  |   * POST /api/upload        |
+|   * Генерация ответа    |  | - @model.switch_model      |  |   * Обработка загрузки      |
+|   * Использует          |  |   * POST /api/switch-model |  | - @rag.list_documents       |
+|     llm_manager         |  |   * Меняет модель в сессии |  |   * GET /api/documents      |
+| - @main.get_session_info|  |                            |  |   * Список документов       |
+|   * GET /api/session/   |  |                            |  | - @rag.delete_document      |
+|   * Инфа о сессии       |  |                            |  |   * DELETE /api/documents/  |
+| - @main.get_current_sess|  |                            |  |   * Удаление документа      |
++-------------------------+  +----------------------------+  | - @rag.rag_stats            |
+                                           |                 |   * GET /api/rag/stats      |
+                                           v                 |   * Статистика RAG          |
++---------------------------------------------------------------------------------------------+
+|                        LLM Manager (app/services/llm_manager.py)                            |
+|  - Центральный сервис управления языковыми моделями                                         |
+|  - Хранит список доступных провайдеров                                                      |
+|  - Хранит ссылку на текущего активного провайдера (`current_provider`)                      |
+|  - Методы:                                                                                  |
+|    * __init__(config) -> инициализирует YandexGPTProvider, LocalLLMProvider                 |
+|    * switch_model(model_name) -> устанавливает `current_provider`                           |
+|    * get_available_models() -> [{'name': 'yandex_gpt', ...}, {'name': 'local_llm', ...}]    |
+|    * generate_response(prompt, use_rag, rag_context, ...) ->                                |
+|      вызывает `current_provider.generate(full_prompt, ...)`                                 |
+|    * get_system_prompt(model_name) -> читает промпт из файла `prompts/{model_name}.txt`     |
++---------------------------------------------------------------------------------------------+
+                                           |
+                              Вызов метода провайдера
+                              (`current_provider.generate`)
+                                           |
+                          +----------------+-----------------+
+                          |                                  |
+                          v                                  v
++---------------------------------------------------+  +----------------------------------------------------+
+| YandexGPTProvider (в llm_manager.py)              |  | LocalLLMProvider (в llm_manager.py)                |
+| - Использует библиотеку `openai.OpenAI`           |  | - Использует библиотеку `openai.OpenAI`            |
+| - self.client.base_url = "https://llm.api.cloud.yandex.net/v1" |  | - self.client.base_url = "http://localhost:11434/v1" |
+| - self.model = f"gpt://{YANDEX_FOLDER_ID}/yandexgpt-lite"      |  | - self.model_name = LOCAL_MODEL_NAME  |
+| - Метод `generate(prompt, temperature: float = 0.7, max_tokens: int = 2000) -> str`:       |
+|   * Формирует `messages = [{"role": "user", "content": prompt}]`| | - Метод `generate(prompt, temperature: float = 0.7, max_tokens: int = 1000) -> str`: |
+|   * Вызывает `self.client.chat.completions.create(...)`       |  |   * Формирует `messages = [{"role": "user", "content": prompt}]` |
+|   * Возвращает `response.choices[0].message.content.strip()`  |  |   * Вызывает `self.client.chat.completions.create(...)` |
+|   * Возвращает `response.choices[0].message.content.strip()`  |  |   * Возвращает `response.choices[0].message.content.strip()` |
++---------------------------------------------------+  +----------------------------------------------------+
+                                           |
+                             (Опционально) RAG Context
+                                           |
+                                           v
++---------------------------------------------------------------------------------------------+
+|                          RAG Engine (app/services/rag_engine.py)                            |
+|  - Сервис для работы с RAG (Retrieval Augmented Generation)                                 |
+|  - Использует `sentence-transformers` для создания эмбеддингов                              |
+|  - Использует `PyPDF2`, `python-docx` для извлечения текста                                 |
+|  - Использует `VectorDB` для поиска похожих фрагментов                                      |
+|  - Методы:                                                                                  |
+|    * __init__(vector_db, embedding_model_name, chunk_size, chunk_overlap)                   |
+|    * add_document(file_path, doc_id) -> обрабатывает файл, добавляет в FAISS                |
+|    * augment_prompt(query, k=3) -> ищет контекст, возвращает строку                         |
++---------------------------------------------------------------------------------------------+
+                                           |
+                                           v
++---------------------------------------------------------------------------------------------+
+|                          Vector DB (app/services/vector_db.py)                              |
+|  - Сервис для работы с векторной базой данных FAISS                                         |
+|  - Использует библиотеку `faiss`                                                            |
+|  - Хранит индекс в `data/faiss_index/`                                                      |
+|  - Методы:                                                                                  |
+|    * __init__(index_path, embedding_model_name)                                             |
+|    * initialize_index() -> загружает или создаёт FAISS индекс                               |
+|    * add_embeddings(embeddings, metadata) -> добавляет векторы в индекс                     |
+|    * search_vectors(query_embedding, k) -> ищет k ближайших соседей                         |
+|    * save_index(), load_index() -> сохраняет/загружает индекс с диска                       |
++---------------------------------------------------------------------------------------------+
+                                           |
+                                           v
++---------------------------------------------------------------------------------------------+
+|                                  БАЗА ДАННЫХ (SQLite)                                       |
+|  - Файл: `data/database.db`                                                                 |
+|  - Используется SQLAlchemy ORM                                                              |
+|                                                                                             |
+|  Модели (app/models.py):                                                                    |
+|  - User(id, username, email, created_at)                                                    |
+|  - ChatSession(id, user_id, title, created_at, model_used)                                  |
+|  - Message(session_id, content, is_user, timestamp, used_rag)                               |
+|  - Document(id, filename, file_path, file_size, uploaded_at, processed)                     |
++---------------------------------------------------------------------------------------------+
+                                           |
+                                           v
++---------------------------------------------------------------------------------------------+
+|                                  ФАЙЛОВАЯ СИСТЕМА                                           |
+|                                                                                             |
+|  - data/                                                                                    |
+|    - database.db                                                                            |
+|    - documents/  -> Хранение загруженных файлов пользователей                               |
+|    - faiss_index/ -> Хранение FAISS индекса и метаданных                                    |
+|  - prompts/                                                                                 |
+|    - yandex_gpt.txt  -> Системный промпт для Yandex GPT                                     |
+|    - local_llm.txt   -> Системный промпт для локальной модели                               |
+|  - app/                                                                                     |
+|    - static/                                                                                |
+|      - css/style.css  -> Все стили                                                          |
+|      - js/chat.js     -> Вся клиентская логика (AJAX, DOM)                                  |
+|      - images/        -> Аватарки, иконки                                                   |
+|    - templates/                                                                             |
+|      - base.html      -> Базовый шаблон (навигация, подключение стилей/скриптов)            |
+|      - chat.html      -> Шаблон главной страницы чата                                       |
+|      - upload.html    -> Шаблон страницы загрузки документов                                |
+|      - models.html    -> Шаблон страницы управления моделями                                |
++---------------------------------------------------------------------------------------------+
+                                           |
+                                           v
++---------------------------------------------------------------------------------------------+
+|                                  ВНЕШНИЕ СЕРВИСЫ                                            |
+|                                                                                             |
+|  - Yandex Cloud GPT API (https://llm.api.cloud.yandex.net/v1)                               |
+|    * Требует YANDEX_API_KEY и YANDEX_FOLDER_ID                                              |
+|  - Ollama API (http://localhost:11434/v1)                                                   |
+|    * Требует запущенного Ollama сервера и модели (например локальной `deepseek-r1:1.5b`)    |
++---------------------------------------------------------------------------------------------+
+                                           |
+                                           v
++---------------------------------------------------------------------------------------------+
+|                                  TELEGRAM БОТ (app/bot/telegram_bot.py)                     |
+|  - Запускается отдельно: `python run.py bot`                                                |
+|  - Использует библиотеку `python-telegram-bot`                                              |
+|  - Общается с пользователем через Telegram                                                  |
+|  - Использует тот же `LLMManager`, что и веб-интерфейс                                      |
+|  - Маршруты:                                                                                |
+|    * /start -> выбор модели                                                                 |
+|    * /model -> смена модели                                                                 |
+|    * /reset -> сброс истории                                                                |
+|    * /help  -> помощь                                                                       |
+|  - Логика:                                                                                  |
+|    * Обработка команд                                                                       |
+|    * Управление состоянием пользователей                                                    |
+|    * Генерация ответов через `LLMManager`                                                   |
++---------------------------------------------------------------------------------------------+
+                                           |
+                                           v
++---------------------------------------------------------------------------------------------+
+|                                  RUN.PY (точка входа)                                       |
+|  - Запускает Flask и Telegram-бота                                                          |
++---------------------------------------------------------------------------------------------+
+                    </pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// [JavaScript]
+</script>
+{% endblock %}

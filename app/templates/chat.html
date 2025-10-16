@@ -1,0 +1,73 @@
+<!-- app/templates/chat.html -->
+{% extends "base.html" %}
+
+{% block title %}Чат с AI Ассистентом{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+    <!-- Основной контент чата -->
+    <div class="col-12 col-lg-8">
+        <div class="card h-100">
+            <div class="card-body d-flex flex-column">
+                <!-- Выбор модели -->
+                <div class="mb-3">
+                    <label for="modelSelect" class="form-label">Выберите модель:</label>
+                    <select id="modelSelect" class="form-select" data-session-id="{{ session_id }}">
+                        <!-- Заполняется через JS -->
+                    </select>
+                </div>
+
+                <!-- История чата -->
+                <div id="chatHistory" class="flex-grow-1 border rounded p-3 mb-3" style="min-height: 400px; max-height: 60vh; overflow-y: auto; background-color: #f8f9fa;">
+                    <!-- Сообщения будут подгружаться сюда через JS -->
+                    <div class="text-center text-muted h-100 d-flex align-items-center justify-content-center">
+                        <div>
+                            <i class="bi bi-chat-dots display-6 text-muted mb-3"></i>
+                            <p>История чата появится здесь</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Форма ввода -->
+                <form id="chatForm" class="mt-auto">
+                    <div class="input-group">
+                        <input type="text" id="userMessage" class="form-control" placeholder="Введите ваше сообщение..." required>
+                        <button type="submit" class="btn btn-primary d-flex align-items-center">
+                            <i class="bi bi-send me-2 d-none d-sm-inline"></i>
+                            <span>Отправить</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Боковая панель с информацией -->
+    <div class="col-12 col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0 d-flex align-items-center">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Информация о сессии
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-2"><strong>ID сессии:</strong> <code class="small">{{ session_id }}</code></p>
+                <p class="mb-2"><strong>Модель:</strong> <span id="currentModel" class="badge bg-primary">загрузка...</span></p>
+                <p class="mb-3"><strong>Документы RAG:</strong> <span id="ragStatus" class="badge bg-light">проверка...</span></p>
+                <a href="{{ url_for('rag.upload_page') }}" class="btn btn-outline-secondary btn-sm w-100">
+                    <i class="bi bi-folder-plus me-1"></i>
+                    Управление документами
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Передаём session_id в глобальную переменную для chat.js
+    window.chatConfig = {
+        sessionId: "{{ session_id }}"
+    };
+</script>
+{% endblock %}

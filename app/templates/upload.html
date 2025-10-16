@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Управление документами{% endblock %}
+
+{% block content %}
+<h2>Загрузка и управление документами</h2>
+
+<!-- Форма загрузки -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5>Загрузить новый документ</h5>
+    </div>
+    <div class="card-body">
+        <form id="uploadForm" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="documentFile" class="form-label">Выберите файл (PDF, DOCX, TXT, до 16 МБ):</label>
+                <input type="file" class="form-control" id="documentFile" name="file" required>
+                <div class="form-text">Поддерживаются: .txt, .pdf, .docx</div>
+            </div>
+            <button type="submit" class="btn btn-success">Загрузить</button>
+            <div id="uploadProgress" class="mt-2" style="display: none;">
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+                </div>
+                <small class="text-muted">Обработка документа в фоне...</small>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Список документов -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5>Загруженные документы</h5>
+        <button id="refreshDocuments" class="btn btn-outline-secondary btn-sm">Обновить</button>
+    </div>
+    <div class="card-body">
+        <div id="documentsList">
+            <!-- Список подгружается через JS -->
+            <p class="text-muted">Загрузка списка документов...</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
