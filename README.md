@@ -26,7 +26,7 @@ TELEGRAM_BOT_TOKEN=
 OLLAMA_BASE_URL=http://localhost:11434
 LOCAL_MODEL_NAME=    #deepseek-r1:1.5b - пример имени "cmd: ollama list > NAME"
 
-## Установка зависимостей
+# Установка зависимостей
 1. Откройте терминал в корне проекта ai-assistant-rag-multiple
 2. Выполните команды по порядку:
 
@@ -46,7 +46,7 @@ python.exe -m pip install --upgrade pip
 # Установка зависимостей (≈4 мин)
 pip install -r requirements.txt
 
-## Решение возможных проблем
+# Решение возможных проблем
 Проблема с кодировкой (Windows)
 Если возникают ошибки из-за смайликов в коде, выполните в PowerShell:
 
@@ -54,7 +54,7 @@ powershell
 [Environment]::SetEnvironmentVariable("PYTHONIOENCODING", "utf-8", "User")
 После этого перезапустите терминал.
 
-#### Запуск приложения
+# Запуск приложения
 Убедитесь, что виртуальное окружение активировано (в терминале должно отображаться (venv))
 
 Запустите файл run.py:
